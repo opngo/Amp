@@ -110,7 +110,7 @@ jobs:
 
       - name: Attach to a draft release
         if: ${{ inputs.upload_release }}
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: windows-${{ github.run_number }}
           name: Windows build ${{ github.run_number }}
