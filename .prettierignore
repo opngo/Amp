@@ -1,0 +1,8 @@
+node_modules
+dist
+out
+release
+coverage
+package-lock.json
+apps/renderer/public/demo
+apps/desktop/resources

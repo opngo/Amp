@@ -1,0 +1,57 @@
+appId: app.amp.audiobooks
+productName: Amp
+copyright: MIT Licensed - Amp contributors
+# Pinned so electron-builder can resolve platform binaries without a range.
+electronVersion: 33.4.11
+directories:
+  output: release
+  buildResources: resources
+files:
+  - out/**/*
+  - package.json
+# Names must be safe for every platform: the package is scoped (@amp/desktop),
+# so the default would produce "@amp/desktop-0.9.0-x64.deb".
+artifactName: ${productName}-${version}-${arch}.${ext}
+extraMetadata:
+  main: out/main/index.js
+asar: true
+compression: maximum
+npmRebuild: false
+linux:
+  # The package name is scoped (@amp/desktop), which is not a valid binary name.
+  executableName: amp
+  target:
+    - AppImage
+    - deb
+    - tar.gz
+  category: AudioVideo
+  synopsis: A small, fast audiobook player with chapters, torrents and transcription
+  desktop:
+    entry:
+      MimeType: audio/mpeg;audio/mp4;audio/x-m4b;audio/flac;audio/ogg;audio/opus;video/mp4;
+mac:
+  target:
+    - dmg
+    - zip
+  category: public.app-category.books
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: resources/entitlements.mac.plist
+  entitlementsInherit: resources/entitlements.mac.plist
+win:
+  target:
+    - nsis
+    - portable
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  # Both Windows targets are .exe files, so the shared pattern would name the
+  # installer and the portable build exactly the same thing and one would
+  # overwrite the other on the release page.
+  artifactName: ${productName}-${version}-setup.${ext}
+portable:
+  artifactName: ${productName}-${version}-portable.${ext}
+publish:
+  provider: github
+  releaseType: draft

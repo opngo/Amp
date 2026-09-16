@@ -1,0 +1,121 @@
+name: Windows build
+
+# The Windows installer and the portable build, without cutting a release.
+#
+# `Release` only runs on a tag, which means every attempt at a Windows build
+# meant tagging a version first. This workflow is the one to press when you want
+# an .exe: it builds both Windows targets, checks that they are actually there,
+# and hands them back as downloadable artifacts. Running it on main as well
+# keeps a known-good build for the current code one click away.
+on:
+  workflow_dispatch:
+    inputs:
+      upload_release:
+        description: Attach the builds to a draft release instead of artifacts only
+        type: boolean
+        default: false
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/desktop/**"
+      - "apps/renderer/**"
+      - "packages/**"
+      - ".github/workflows/windows.yml"
+
+permissions:
+  contents: write
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  windows:
+    name: Installer and portable
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Tests
+        run: npx vitest run --reporter=dot
+
+      - name: Build the unpacked app
+        run: npm run build --workspace @amp/desktop
+
+      - name: Package for Windows
+        run: npx electron-builder --win nsis portable --publish never
+        working-directory: apps/desktop
+        env:
+          # Signing, when the secrets exist. An unsigned build still works and
+          # is what most forks will produce.
+          CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+
+      - name: List what was packaged
+        shell: bash
+        run: ls -lh apps/desktop/release/*.exe
+
+      - name: Check both targets exist
+        shell: bash
+        run: |
+          setup=$(ls apps/desktop/release/*-setup.exe 2>/dev/null | head -1)
+          portable=$(ls apps/desktop/release/*-portable.exe 2>/dev/null | head -1)
+          if [ -z "$setup" ] || [ -z "$portable" ]; then
+            echo "Expected both an installer and a portable build."
+            ls -R apps/desktop/release
+            exit 1
+          fi
+          echo "installer: $setup"
+          echo "portable:  $portable"
+
+      - name: Upload the installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: amp-windows-installer
+          path: apps/desktop/release/*-setup.exe
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload the portable build
+        uses: actions/upload-artifact@v4
+        with:
+          name: amp-windows-portable
+          path: apps/desktop/release/*-portable.exe
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Summary
+        shell: bash
+        run: |
+          {
+            echo "### Windows build"
+            echo ""
+            echo "- Installer: \`$(basename $(ls apps/desktop/release/*-setup.exe | head -1))\`"
+            echo "- Portable: \`$(basename $(ls apps/desktop/release/*-portable.exe | head -1))\`"
+            echo ""
+            echo "Both are in the artifacts of this run."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Attach to a draft release
+        if: ${{ inputs.upload_release }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: windows-${{ github.run_number }}
+          name: Windows build ${{ github.run_number }}
+          draft: true
+          files: |
+            apps/desktop/release/*-setup.exe
+            apps/desktop/release/*-portable.exe
+            apps/desktop/release/*.blockmap

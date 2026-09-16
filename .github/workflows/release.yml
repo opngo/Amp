@@ -1,0 +1,181 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to build (must already exist)
+        required: true
+        default: v0.9.0
+
+permissions:
+  contents: write
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  verify:
+    name: Verify the tag
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tests
+        run: npx vitest run --reporter=dot
+
+      - name: Version matches the tag
+        run: |
+          node -e "
+            const tag = (process.env.GITHUB_REF_NAME || '').replace(/^v/, '');
+            const version = require('./package.json').version;
+            if (tag && tag !== version) {
+              console.error('Tag ' + tag + ' does not match package.json ' + version);
+              process.exit(1);
+            }
+            console.log('Version ' + version);
+          "
+
+  package:
+    name: Package ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    needs: verify
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: Linux
+            os: ubuntu-latest
+            target: linux
+            artifact: amp-linux
+          - label: macOS
+            os: macos-latest
+            target: mac
+            artifact: amp-macos
+          - label: Windows
+            os: windows-latest
+            target: win
+            artifact: amp-windows
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Signing is optional: the build works without it, and picks the
+      # certificates up automatically when the secrets are configured.
+      - name: Package
+        run: npm run dist:${{ matrix.target }} --workspace @amp/desktop -- --publish never
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: List the artifacts
+        shell: bash
+        run: ls -R apps/desktop/release | head -50
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            apps/desktop/release/*.AppImage
+            apps/desktop/release/*.deb
+            apps/desktop/release/*.tar.gz
+            apps/desktop/release/*.dmg
+            apps/desktop/release/*.zip
+            apps/desktop/release/*.exe
+            apps/desktop/release/*.blockmap
+            apps/desktop/release/latest*.yml
+          retention-days: 14
+          if-no-files-found: error
+
+  release:
+    name: Publish the release
+    runs-on: ubuntu-latest
+    needs: package
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download every artifact
+        uses: actions/download-artifact@v4
+        with:
+          path: dist-artifacts
+          merge-multiple: true
+
+      - name: Checksums
+        run: |
+          cd dist-artifacts
+          find . -type f ! -name "*.yml" ! -name "*.blockmap" -print0 \
+            | xargs -0 sha256sum > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Publish
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          name: Amp ${{ inputs.tag || github.ref_name }}
+          generate_release_notes: true
+          draft: false
+          files: |
+            dist-artifacts/*
+          body: |
+            Amp ${{ inputs.tag || github.ref_name }}.
+
+            Downloads per platform are built by the release workflow from the
+            tagged commit. Checksums are in SHA256SUMS.txt. Update metadata
+            (latest.yml, latest-mac.yml) is included for the in-app updater.
+
+            If you are on macOS or Windows and the build is unsigned, your
+            system will warn you the first time you open it.
+
+  summary:
+    name: Summarise
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - name: Job summary
+        run: |
+          {
+            echo "### Amp ${{ inputs.tag || github.ref_name }} released"
+            echo ""
+            echo "- Verified: typecheck, lint and tests"
+            echo "- Packaged: Linux, macOS, Windows"
+            echo "- Published to the GitHub release with checksums"
+            echo ""
+            echo "Release: https://github.com/${{ github.repository }}/releases/tag/${{ inputs.tag || github.ref_name }}"
+          } >> "$GITHUB_STEP_SUMMARY"

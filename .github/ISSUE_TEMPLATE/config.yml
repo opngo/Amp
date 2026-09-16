@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Troubleshooting
+    url: https://github.com/amp-app/amp/blob/main/docs/troubleshooting.md
+    about: Install problems, playback, torrents, transcription, the remote server.
+  - name: Question or idea
+    url: https://github.com/amp-app/amp/discussions
+    about: Ask a question or share how you use Amp.

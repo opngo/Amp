@@ -1,0 +1,62 @@
+name: Landing page
+
+# The landing page in apps/website is static: index.html, one stylesheet and two
+# plain scripts. There is no bundler, no dependency and no build step, so this
+# workflow does not install anything - it checks that the folder is complete and
+# publishes it as it stands.
+#
+# Pages has to be pointed at "GitHub Actions" once in the repository settings
+# (Settings > Pages > Source).
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "apps/website/**"
+      - "scripts/check-site.mjs"
+      - ".github/workflows/pages.yml"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Check the static site
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Check the page (no install, no build)
+        run: node scripts/check-site.mjs
+
+      - name: Keep Pages from running Jekyll over the site
+        run: touch apps/website/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: apps/website
+
+  deploy:
+    name: Publish
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4

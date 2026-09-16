@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Amp">
+  <defs>
+    <linearGradient id="amp" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6c8cff"/>
+      <stop offset="100%" stop-color="#ff9ecb"/>
+    </linearGradient>
+  </defs>
+  <rect x="30.7" y="30.7" width="450.6" height="450.6" rx="112.6" fill="url(#amp)"/>
+  <circle cx="256.0" cy="256.0" r="105.0" fill="none" stroke="#ffffff" stroke-width="13.8" opacity="0.94"/>
+  <circle cx="256.0" cy="256.0" r="139.3" fill="none" stroke="#ffffff" stroke-width="12.3" opacity="0.6"/>
+  <circle cx="256.0" cy="256.0" r="173.6" fill="none" stroke="#ffffff" stroke-width="10.8" opacity="0.32"/>
+  <rect x="190.5" y="190.5" width="131.1" height="131.1" rx="20.5" fill="#ffffff" opacity="0.96"/>
+</svg>

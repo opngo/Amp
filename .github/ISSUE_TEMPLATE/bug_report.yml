@@ -1,0 +1,65 @@
+name: Bug report
+description: Something in Amp does not work
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. `npm run doctor` prints the versions, paths and
+        missing tools that usually answer the first round of questions, and the
+        About dialog has a button that copies the same details.
+  - type: input
+    id: version
+    attributes:
+      label: Amp version
+      description: About dialog, or the `npm run` output for a source checkout
+      placeholder: 0.9.0
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Linux
+        - macOS (Apple silicon)
+        - macOS (Intel)
+        - Windows
+        - Web build in a browser
+        - Python companion (gui.py, tui.py, server.py)
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you expected, and what happened instead
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Import a folder of mp3s
+        2. Right-click the book
+        3. Choose "Edit chapters"
+        4. ...
+    validations:
+      required: true
+  - type: input
+    id: file
+    attributes:
+      label: Book or file involved
+      description: Extension, how it was added, and whether it has embedded chapters
+      placeholder: m4b, added as a file, embedded chapters, 12 hours
+    validations:
+      required: false
+  - type: textarea
+    id: logs
+    attributes:
+      label: Diagnostics
+      description: Paste `npm run doctor`, the About dialog output, or the terminal log
+      render: text
+    validations:
+      required: false

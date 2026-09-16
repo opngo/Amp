@@ -1,0 +1,69 @@
+{
+  "name": "amp-audiobooks",
+  "version": "0.9.0",
+  "private": true,
+  "description": "Amp - a fast, beautiful audiobook player (Electron + React), with library tools, torrent search, tailscale streaming, TUI and Python GUI companions.",
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/desktop",
+    "apps/renderer"
+  ],
+  "engines": {
+    "node": ">=20.19.0",
+    "npm": ">=10"
+  },
+  "scripts": {
+    "dev": "npm run dev --workspace @amp/renderer",
+    "predev:desktop": "node scripts/check-env.mjs --quiet",
+    "dev:desktop": "npm run dev --workspace @amp/desktop",
+    "dev:site": "node scripts/serve-site.mjs",
+    "build": "npm run build --workspace @amp/core && npm run build --workspace @amp/renderer && npm run build --workspace @amp/desktop",
+    "build:web": "npm run build --workspace @amp/renderer",
+    "site:check": "node scripts/check-site.mjs",
+    "preview:web": "npm run preview --workspace @amp/renderer",
+    "dist": "npm run dist --workspace @amp/desktop",
+    "dist:win": "npm run dist:win --workspace @amp/desktop",
+    "dist:mac": "npm run dist:mac --workspace @amp/desktop",
+    "dist:linux": "npm run dist:linux --workspace @amp/desktop",
+    "lint": "eslint .",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md,css}\"",
+    "py:gui": "python python/gui.py",
+    "py:tui": "python python/tui.py",
+    "py:server": "python python/server.py",
+    "py:test": "python -m pytest python/tests -q",
+    "icons": "node scripts/make-icons.mjs",
+    "py:check": "python python/gui.py --check",
+    "postinstall": "node scripts/check-env.mjs --hook --fix",
+    "doctor": "node scripts/check-env.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
+    "@types/node": "^22.10.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "44.3.0",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "globals": "^15.14.0",
+    "jsdom": "^29.1.1",
+    "postcss": "^8.4.49",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.0",
+    "vite": "^6.0.7",
+    "vitest": "^4.1.11"
+  },
+  "overrides": {
+    "cssnano": "^7.0.7",
+    "cssnano-preset-default": "^7.0.7"
+  }
+}

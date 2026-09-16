@@ -1,0 +1,137 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "22"
+  PYTHON_VERSION: "3.12"
+
+jobs:
+  checks:
+    name: Typecheck, lint and tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Doctor
+        run: npm run doctor
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npx vitest run --reporter=dot
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Python tests
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pytest
+          python -m pytest python/tests -q
+
+      - name: Companion tools still run
+        run: |
+          python python/gui.py --check
+          python python/tui.py --print-settings > /dev/null
+          python python/server.py --help > /dev/null
+
+      - name: Icons regenerate deterministically
+        run: |
+          npm run icons
+          npm run icons
+          git diff --exit-code -- apps/desktop/resources assets apps/website/public/icon.png
+
+  build:
+    name: Build renderer, website and desktop bundles
+    runs-on: ubuntu-latest
+    needs: checks
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build renderer
+        run: npm run build:web
+
+      - name: Check the landing page (static, nothing to build)
+        run: npm run site:check
+
+      - name: Build Electron bundles
+        run: npm run build --workspace @amp/desktop
+
+      - name: Upload web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: amp-web
+          path: apps/renderer/dist
+          retention-days: 7
+          if-no-files-found: error
+
+      - name: Upload Electron bundles
+        uses: actions/upload-artifact@v4
+        with:
+          name: amp-electron-bundles
+          path: apps/desktop/out
+          retention-days: 7
+          if-no-files-found: error
+
+  package:
+    name: Package Linux build
+    runs-on: ubuntu-latest
+    needs: checks
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Package
+        run: npm run dist:linux --workspace @amp/desktop -- --publish never
+
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: amp-linux-smoke
+          path: |
+            apps/desktop/release/*.AppImage
+            apps/desktop/release/*.deb
+            apps/desktop/release/*.yml
+          retention-days: 7
+          if-no-files-found: warn

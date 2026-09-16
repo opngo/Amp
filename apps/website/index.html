@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Amp — a small, fast audiobook player for your desktop</title>
+<meta name="description" content="Amp plays m4b, mp3 and mp4 audiobooks with real chapter support, a working equalizer, torrent search, playlists and optional local transcription. Electron and React, MIT licensed." />
+<meta name="theme-color" content="#111213" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<header class="nav" id="nav">
+  <div class="shell nav-inner">
+    <a class="brand" href="#top">
+      <span class="brand-mark" aria-hidden="true">▍▍▍</span>
+      <span class="brand-word">amp</span>
+    </a>
+
+    <nav class="nav-links" id="nav-links">
+      <a href="#features">features</a>
+      <a href="#playback">playback</a>
+      <a href="#acquisition">downloads</a>
+      <a href="#install">install</a>
+    </nav>
+
+    <div class="nav-actions">
+      <a class="icon-link" href="https://github.com/opngo/amp" aria-label="Amp on GitHub">
+        <i data-lucide="github"></i>
+      </a>
+      <a class="btn btn-solid" href="#install">
+        <i data-lucide="terminal-square"></i>
+        get amp
+      </a>
+      <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-links" aria-label="Toggle menu">
+        <i data-lucide="menu"></i>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============================================================ HERO -->
+  <section id="top" class="hero">
+    <div class="hero-badges shell">
+      <span class="badge">electron</span>
+      <span class="badge">react</span>
+      <span class="badge">mit licensed</span>
+    </div>
+
+    <div class="hero-stage">
+      <pre class="hero-wave" id="hero-wave" aria-hidden="true"></pre>
+      <h1 class="hero-headline">
+        <span class="line">every chapter,</span>
+        <span class="line">every word,</span>
+        <span class="line accent">every note.</span>
+      </h1>
+    </div>
+
+    <div class="hero-foot shell">
+      <p class="hero-lede">
+        Amp is a small desktop player for the audiobooks you already own — real
+        m4b chapters, a ten-band equalizer that works, a tray widget for when
+        you're working, and search that hands magnets straight to qBittorrent.
+      </p>
+      <a class="pill-cta" href="#features">
+        <i data-lucide="play"></i>
+        see it in action
+      </a>
+    </div>
+  </section>
+
+  <div class="wave-divider" data-phase="0" aria-hidden="true"></div>
+
+  <!-- ======================================================== FEATURES -->
+  <section id="features" class="shell section">
+    <div class="section-head">
+      <p class="kicker">// features</p>
+      <h2>The whole feature list, without the asterisks</h2>
+      <p class="section-sub">
+        Each item below is implemented in the app you can download today — the same
+        code the tests in this repository run against.
+      </p>
+    </div>
+
+    <div class="card-grid" id="features-grid"></div>
+  </section>
+
+  <div class="wave-divider" data-phase="2" aria-hidden="true"></div>
+
+  <!-- ========================================================= PLAYBACK -->
+  <section id="playback" class="shell section">
+    <div class="section-head">
+      <p class="kicker">// playback</p>
+      <h2>Built on the Web Audio graph, not a wrapper around it</h2>
+      <p class="section-sub">
+        Audio goes element → ten biquad filters → preamp → panner → analyser →
+        output gain — which is what makes the equalizer and device switching
+        real instead of decorative.
+      </p>
+    </div>
+
+    <div class="playback-grid">
+      <table class="feature-table" id="playback-table"></table>
+      <div class="card-grid card-grid-1col" id="playback-cards"></div>
+    </div>
+  </section>
+
+  <div class="wave-divider" data-phase="4" aria-hidden="true"></div>
+
+  <!-- ======================================================= ACQUISITION -->
+  <section id="acquisition" class="shell section">
+    <div class="section-head">
+      <p class="kicker">// acquisition</p>
+      <h2>Find it, download it, listen to it</h2>
+      <p class="section-sub">
+        Amp never bundles a torrent client and never scrapes in the background.
+        It searches when you ask, hands the magnet to qBittorrent, and imports
+        the result once the download finishes.
+      </p>
+    </div>
+
+    <div class="card-grid" id="acquisition-grid"></div>
+  </section>
+
+  <div class="wave-divider" data-phase="6" aria-hidden="true"></div>
+
+  <!-- ============================================================ INSTALL -->
+  <section id="install" class="shell section">
+    <div class="section-head">
+      <p class="kicker">// install</p>
+      <h2>Grab a build, or run it from source</h2>
+      <p class="section-sub">
+        Releases are produced by the same workflow in this repository. There's
+        also a web build you can serve with server.py if you'd rather stream
+        from a home server.
+      </p>
+    </div>
+
+    <div class="card-grid" id="install-grid"></div>
+
+    <div class="source-block">
+      <div class="term-chrome">
+        <span class="term-tag">[ − ]</span>
+        <span class="term-tag">[ □ ]</span>
+        <span class="term-tag">[ x ]</span>
+        <span class="term-title">from source</span>
+      </div>
+      <pre class="source-code">git clone https://github.com/opngo/amp
+cd amp
+npm install
+npm run dev:desktop</pre>
+    </div>
+  </section>
+
+</main>
+
+<div class="wave-divider" data-phase="8" aria-hidden="true"></div>
+
+<footer class="footer">
+  <div class="shell footer-grid">
+    <div class="footer-brand">
+      <a class="brand" href="#top">
+        <span class="brand-mark" aria-hidden="true">▍▍▍</span>
+        <span class="brand-word">amp</span>
+      </a>
+      <p>
+        Amp is an open-source audiobook player for people who already have
+        the files. No accounts, no telemetry, no lock-in.
+      </p>
+      <div class="footer-tags">
+        <span><i data-lucide="scale"></i> MIT licensed</span>
+        <span><i data-lucide="file-json"></i> JSON library</span>
+      </div>
+    </div>
+
+    <div class="footer-col">
+      <p class="kicker">amp</p>
+      <a href="#features">features</a>
+      <a href="#playback">playback</a>
+      <a href="#acquisition">downloads</a>
+      <a href="#install">install</a>
+    </div>
+
+    <div class="footer-col">
+      <p class="kicker">build</p>
+      <a href="https://github.com/opngo/amp">repository</a>
+      <a href="https://github.com/opngo/amp/releases">releases</a>
+      <a href="https://github.com/opngo/amp/tree/main/.github/workflows">workflows</a>
+      <a href="https://github.com/opngo/amp/issues">issues</a>
+    </div>
+
+    <div class="footer-col">
+      <p class="kicker">extras</p>
+      <a href="#install">desktop app</a>
+      <a href="#install">web build</a>
+      <a href="#acquisition">python gui</a>
+      <a href="#acquisition">terminal ui</a>
+    </div>
+  </div>
+
+  <div class="shell footer-bottom">
+    <a href="https://github.com/opngo/amp" class="footer-gh">
+      <i data-lucide="github"></i> github.com/opngo/amp
+    </a>
+    <span><i data-lucide="heart"></i> Built for long books and quiet rooms</span>
+  </div>
+</footer>
+
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

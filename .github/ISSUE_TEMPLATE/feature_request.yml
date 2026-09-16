@@ -1,0 +1,45 @@
+name: Feature request
+description: Suggest an improvement
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Amp is meant to stay small. A feature request is more likely to land if
+        it fits the shape of the app rather than adding a new surface to it.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve
+      description: Describe the situation, not the solution you have in mind
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you would like Amp to do
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Library and importing
+        - Playback and chapters
+        - Equalizer and visualizer
+        - Look and feel
+        - Downloads and torrents
+        - Transcription
+        - Remote server
+        - Python companions
+        - Documentation
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you have tried
+      description: Other players, workarounds, or nothing at all
+    validations:
+      required: false

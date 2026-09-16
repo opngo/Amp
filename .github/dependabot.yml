@@ -1,0 +1,40 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      react:
+        patterns:
+          - react
+          - react-dom
+          - "@types/react"
+          - "@types/react-dom"
+      testing:
+        patterns:
+          - vitest
+          - "@testing-library/*"
+          - jsdom
+      electron:
+        patterns:
+          - electron
+          - electron-vite
+          - electron-builder
+          - electron-store
+          - electron-updater
+    ignore:
+      # Electron majors need a manual pass: the main process uses APIs that
+      # change between releases, and the binary version is pinned for packaging.
+      - dependency-name: electron
+        update-types: [version-update:semver-major]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+  - package-ecosystem: pip
+    directory: /python
+    schedule:
+      interval: monthly
