@@ -19,9 +19,9 @@
   },
   "devDependencies": {
     "@amp/core": "*",
-    "electron": "44.3.0",
+    "electron": "44.4.2",
     "electron-builder": "^26.0.0",
-    "electron-vite": "^3.1.0",
+    "electron-vite": "^5.0.0",
     "typescript": "^5.7.2",
     "vite": "^6.0.7"
   },
